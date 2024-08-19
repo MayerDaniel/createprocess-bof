@@ -1,0 +1,30 @@
+alias create-process {
+    local('$command $barch $dhfs $dhrw $task $argvs');
+    $command = $2;
+
+    if( $command eq $null || $command eq "" ) {
+        berror( $1, "No command given" );
+        return;
+    }
+
+    $barch = barch( $1 );
+    $dhfs = openf( script_resource( "./create-process. $+ $barch $+ .o") );
+    $dhrw = readb( $dhfs, -1 );
+    closef( $dhfs );
+
+    if( $dhrw eq $null || $dhrw eq "" ) {
+        berror( $1, "Could not read create-process BOF" );
+        return;
+    }
+
+    $task = "Attempting execute " . $command . " via CreateProcess";
+    btask( $1, $task );
+    $argvs = bof_pack( $1, "Z", $command);
+    beacon_inline_execute( $1, $dhrw, "go", $argvs );
+}
+
+beacon_command_register(
+    "create-process", 
+    "Execute command via CreateProcess",
+    "Usage: create-process <command> "
+)
