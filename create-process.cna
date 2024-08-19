@@ -1,5 +1,5 @@
 alias create-process {
-    local('$command $barch $dhfs $dhrw $task $argvs');
+    local('$command $barch $handle $data $task $argvs');
     $command = $2;
 
     if( $command eq $null || $command eq "" ) {
@@ -8,11 +8,11 @@ alias create-process {
     }
 
     $barch = barch( $1 );
-    $dhfs = openf( script_resource( "./create-process. $+ $barch $+ .o") );
-    $dhrw = readb( $dhfs, -1 );
-    closef( $dhfs );
+    $handle = openf(script_resource("./create-process. $+ $barch $+ .o"));
+    $data = readb($handle, -1);
+    closef($handle);
 
-    if( $dhrw eq $null || $dhrw eq "" ) {
+    if( $data eq $null || $data eq "" ) {
         berror( $1, "Could not read create-process BOF" );
         return;
     }
@@ -20,7 +20,7 @@ alias create-process {
     $task = "Attempting execute " . $command . " via CreateProcess";
     btask( $1, $task );
     $argvs = bof_pack( $1, "Z", $command);
-    beacon_inline_execute( $1, $dhrw, "go", $argvs );
+    beacon_inline_execute( $1, $data, "go", $argvs );
 }
 
 beacon_command_register(
